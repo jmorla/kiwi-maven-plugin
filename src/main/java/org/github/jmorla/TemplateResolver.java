@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 
 /**
@@ -55,13 +56,15 @@ public class TemplateResolver {
             if (pathStr.endsWith(prefix)) {
                 Template template = new Template();
                 template.setFile(path.toFile());
-                template.setRelativePath(pathStr.replace(baseDir.toString(), ""));
+                template.setRelativePath(pathStr.replace(baseDir.toString() + "/", ""));
                 templates.add(template);
             }
         } else {
-            Path[] paths = Files.walk(path).toArray(Path[]::new);
-            for (Path subPath : paths) {
-                resolve(subPath, templates);
+            try (Stream<Path> stream = Files.list(path)) {
+                Path[] paths = stream.toArray(Path[]::new);
+                for (Path subPath : paths) {
+                    resolve(subPath, templates);
+                }
             }
             
         } 
